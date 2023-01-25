@@ -8,7 +8,7 @@ const upload = multer({ storage: multer.memoryStorage() });
 require("dotenv").config();
 const webApp = express();
 const cors = require("cors");
-const CREDENTIALS = require("../ipocreate/src/config/ipodekho-19fc1-firebase-adminsdk-98o3u-1674a03d07.json");
+const CREDENTIALS = require("./src/config/ipodekho-19fc1-firebase-adminsdk-98o3u-1674a03d07.json");
 webApp.use(
   express.urlencoded({
     extended: true,
