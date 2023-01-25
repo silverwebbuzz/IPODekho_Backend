@@ -1,34 +1,11 @@
-const { Firestore } = require("@google-cloud/firestore");
-const CREDENTIALS = require("../config/ipodekho-19fc1-firebase-adminsdk-98o3u-1674a03d07.json");
+const { firestore } = require("../../config/firestoreCloud");
 const express = require("express");
 const webApp = express();
 const saltedMd5 = require("salted-md5");
 const path = require("path");
 const multer = require("multer");
 const upload = multer({ storage: multer.memoryStorage() });
-const {
-  PORT,
-  HOST,
-  HOST_URL,
-  API_KEY,
-  AUTH_DOMAIN,
-  DATABASE_URL,
-  PROJECT_ID,
-  STORAGE_BUCKET,
-  MESSAGING_SENDER_ID,
-  APP_ID,
-} = process.env;
 var admin = require("firebase-admin");
-const uuid = require("uuid-v4");
-const e = require("express");
-
-const firestore = new Firestore({
-  projectId: CREDENTIALS.project_id,
-  credentials: {
-    client_email: CREDENTIALS.client_email,
-    private_key: CREDENTIALS.private_key,
-  },
-});
 const userInformation = firestore.collection("MainLineIPO");
 
 /* 
@@ -91,7 +68,7 @@ const createMainlineIPO = async (req, res, body) => {
         others: req.body.others || "",
         total: req.body.total || "",
         IPOStatus: req.body.IPOStatus || "",
-        ipoOpenDate: req.body.ipoOpenDate || "",
+        IPOOpenDate: req.body.IPOOpenDate || "",
         IPOCloseDate: req.body.IPOCloseDate || "",
         IPOAllotmentDate: req.body.IPOAllotmentDate || "",
         IPORefundsInitiation: req.body.IPORefundsInitiation || "",
@@ -112,7 +89,6 @@ const createMainlineIPO = async (req, res, body) => {
         createdAt: new Date(),
         file: file,
       };
-
       if (GeneralIPO) {
         await userInformation.add(GeneralIPO);
         //  ({ ignoreUndefinedProperties: true })
@@ -124,7 +100,73 @@ const createMainlineIPO = async (req, res, body) => {
         res.status(300).send({ msg: "MainLineIpo Not Found" });
       }
     } else {
-      const GeneralIPOData = req.body;
+      const GeneralIPOData = {
+        companyDescription: req.body.companyDescription || "",
+        ObjectOfIssue: req.body.ObjectOfIssue || "",
+        companyName: req.body.companyName || "",
+        faceValue: req.body.faceValue || "",
+        fromPrice: req.body.fromPrice || "",
+        toPrice: req.body.toPrice || "",
+        lotSize: req.body.lotSize || "",
+        issueSize: req.body.issueSize || "",
+        freshIssue: req.body.freshIssue || "",
+        offerForSale: req.body.offerForSale || "",
+        reatailQuota: req.body.reatailQuota || "",
+        qibQuota: req.body.qibQuota || "",
+        nilQuota: req.body.nilQuota || "",
+        issueType: req.body.issueType || "",
+        listingAt: req.body.listingAt || "",
+        DRHPDraft: req.body.DRHPDraft || "",
+        RHPDraft: req.body.RHPDraft || "",
+        preIssueShareHolding: req.body.preIssueShareHolding || "",
+        postIssueShareHolding: req.body.postIssueShareHolding || "",
+        promotersName: req.body.promotersName || "",
+        companyFinancials: req.body.companyFinancials || "",
+        earningPerShare: req.body.earningPerShare || "",
+        earningPERatio: req.body.earningPERatio || "",
+        returnonNetWorth: req.body.returnonNetWorth || "",
+        netAssetValue: req.body.netAssetValue || "",
+        financialLotsize: req.body.financialLotsize || "",
+        peersComparison: req.body.peersComparison || "",
+        address: req.body.address || "",
+        companyPhone: req.body.companyPhone || "",
+        email: req.body.email || "",
+        website: req.body.website || "",
+        registerName: req.body.registerName || "",
+        registerPhone: req.body.registerPhone || "",
+        registerEmail: req.body.registerEmail || "",
+        registerWebsite: req.body.registerWebsite || "",
+        allotmentLink: req.body.allotmentLink || "",
+        subscriptionDetails: req.body.subscriptionDetails || "",
+        qualifiedInstitutions: req.body.qualifiedInstitutions || "",
+        nonInstitutionalBuyers: req.body.nonInstitutionalBuyers || "",
+        bNII: req.body.bNII || "",
+        sNII: req.body.sNII || "",
+        retailInvestors: req.body.retailInvestors || "",
+        employees: req.body.employees || "",
+        others: req.body.others || "",
+        total: req.body.total || "",
+        IPOStatus: req.body.IPOStatus || "",
+        IPOOpenDate: req.body.IPOOpenDate || "",
+        IPOCloseDate: req.body.IPOCloseDate || "",
+        IPOAllotmentDate: req.body.IPOAllotmentDate || "",
+        IPORefundsInitiation: req.body.IPORefundsInitiation || "",
+        IPODematTransfer: req.body.IPODematTransfer || "",
+        IPOListingDate: req.body.IPOListingDate || "",
+        listingDate: req.body.listingDate || "",
+        listingPrice: req.body.listingPrice || "",
+        listingPosition: req.body.listingPosition || "",
+        listingDifferent: req.body.listingDifferent || "",
+        NSECode: req.body.NSECode || "",
+        BSEScript: req.body.BSEScript || "",
+        closingDate: req.body.closingDate || "",
+        closingPrice: req.body.closingPrice || "",
+        scriptPosition: req.body.scriptPosition || "",
+        closingDifferent: req.body.closingDifferent || "",
+        weekHigh: req.body.weekHigh || "",
+        weekLow: req.body.weekLow || "",
+        createdAt: new Date(),
+      };
       if (GeneralIPOData) {
         await userInformation.add(GeneralIPOData);
         //  ({ ignoreUndefinedProperties: true })
@@ -136,7 +178,7 @@ const createMainlineIPO = async (req, res, body) => {
         res.status(300).send({ msg: "MainLineIpo Not Found" });
       }
     }
-    // webApp.locals.bucket = admin.storage().bucket();
+    webApp.locals.bucket = admin.storage().bucket();
 
     // const uploadImage = async (req, res) => {
 
@@ -230,30 +272,7 @@ const createMainlineIPO = async (req, res, body) => {
     res.status(400).send(error);
   }
 };
-const companyFinancial = async (req, res) => {
-  try {
-    const companyFinancial = {
-      companyFinancials: req.body.companyFinancials,
-      earningPerShare: req.body.earningPerShare,
-      earningPERatio: req.body.earningPERatio,
-      returnonNetWorth: req.body.returnonNetWorth,
-      netAssetValue: req.body.netAssetValue,
-      financialLotsize: req.body.financialLotsize,
-      peersComparison: req.body.peersComparison,
-    };
-    await userInformation.add(companyFinancial);
-    if (companyFinancial) {
-      res.status(200).send({
-        msg: "companyFinancial Created Successfully",
-        data: companyFinancial,
-      });
-    } else {
-      res.status(404).send({ msg: "MainLineIpo Not Found" });
-    }
-  } catch (error) {
-    console.log(`Error at createDocument --> ${error}`);
-  }
-};
+
 /* 
 Get All MainLineIPO List 
 **/
@@ -262,7 +281,7 @@ const GetMainLineIpo = async (req, res) => {
   const GetIpo = await userInformation
     .select(
       "companyName",
-      "ipoOpenDate",
+      "IPOOpenDate",
       "IPOCloseDate",
       "lotSize",
       "GMPStatus",
@@ -340,6 +359,7 @@ const GetIdByMainLineIpo = async (req, res) => {
           True = false;
           const Data = doc.data(usersArray.id);
           //MainLineIPO Genral
+          const id = doc.id;
           const preIssueShareHolding = Data.preIssueShareHolding;
           const reatailQuota = Data.reatailQuota;
           const qibQuota = Data.qibQuota;
@@ -406,18 +426,19 @@ const GetIdByMainLineIpo = async (req, res) => {
           //Status
           const IPOstatus = Data.IPOStatus;
           //Tentative Timetable
-          const ipoOpenDate = Data.ipoOpenDate;
+          const IPOOpenDate = Data.IPOOpenDate;
           const IPOCloseDate = Data.IPOCloseDate;
           const IPOAllotmentDate = Data.IPOAllotmentDate;
           const IPORefundsInitiation = Data.IPORefundsInitiation;
           const IPODematTransfer = Data.IPODematTransfer;
           const IPOListingDate = Data.IPOListingDate;
 
+          const file = Data.file;
           usersArray.push(doc.data());
           // const company = { File, companyName };
           // const address1 = { address };
           const TentativeTimetable = {
-            ipoOpenDate,
+            IPOOpenDate,
             IPOCloseDate,
             IPOAllotmentDate,
             IPORefundsInitiation,
@@ -499,6 +520,7 @@ const GetIdByMainLineIpo = async (req, res) => {
           };
           const ListingInfo = { listingInfo };
           const General = {
+            id,
             general,
             CompanyRegisterInfo,
             financials,
@@ -506,6 +528,7 @@ const GetIdByMainLineIpo = async (req, res) => {
             ListingInfo,
             IPOStatus,
             TentativeTimetable,
+            file,
           };
           res.status(200).send({
             msg: "MainLineIPO All Data Get Successfully",
@@ -577,7 +600,7 @@ const uploadImage = async (req, res) => {
   const GetIpo = userInformation.doc(id);
   const GetData = await GetIpo.get();
   const file = `https://firebasestorage.googleapis.com/v0/b/ipodekho-19fc1.appspot.com/o/${fileName}?alt=media&token=11c648b5-a554-401c-bc4e-ba9155f29744`;
-  if (GetData.exists) {
+  if (GetData) {
     await userInformation.doc(id).update({ file: file });
     res.status(200).send({ msg: "Image Uploaded Successfully", file: file });
   } else {
@@ -643,7 +666,6 @@ const updateStatus = async (req, res) => {
 };
 module.exports = {
   createMainlineIPO,
-  companyFinancial,
   GetMainLineIpo,
   UpdateMainLineIpo,
   DeleteMainLineIpo,

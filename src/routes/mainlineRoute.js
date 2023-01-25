@@ -9,6 +9,7 @@ const upload = multer({ storage: multer.memoryStorage() });
 router.post(
   "/createMainlineIPO",
   upload.single("file"),
+  // upload.none(),
   FIREBASE_API.createMainlineIPO
 );
 router.post("/companyFinancial", FIREBASE_API.companyFinancial);
