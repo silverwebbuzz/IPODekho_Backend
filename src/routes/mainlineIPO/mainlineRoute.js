@@ -7,19 +7,19 @@ const multer = require("multer");
 const upload = multer({ storage: multer.memoryStorage() });
 
 router.post(
-  "/createMainlineIPO",
-  upload.single("file"),
+  "/createMainlineIPO/:id",
   // upload.none(),
   MainLineIPO.createMainlineIPO
 );
-router.get("/GetMainLineIpo", MainLineIPO.GetMainLineIpo);
-router.get("/GetIdByMainLineIpo/:id", MainLineIPO.GetIdByMainLineIpo);
+router.post("/GetMainLineIpo", MainLineIPO.GetMainLineIpo);
+router.post("/GetIdByMainLineIpo/:id", MainLineIPO.GetIdByMainLineIpo);
 router.post("/UpdateMainLineIpo/:id", MainLineIPO.UpdateMainLineIpo);
 router.delete("/DeleteMainLineIpo/:id", MainLineIPO.DeleteMainLineIpo);
 router.post("/uploadImage/:id", upload.single("file"), MainLineIPO.uploadImage);
 router.get("/GetImage/:id", MainLineIPO.GetImage);
 router.put("/updateStatus/:id", MainLineIPO.updateStatus);
 router.get("/GetIMainLineIPOStatus/:id", MainLineIPO.GetIMainLineIPOStatus);
+router.get("/Pagination", MainLineIPO.Pagination);
 module.exports = {
   router,
 };

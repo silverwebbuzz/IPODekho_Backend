@@ -7,12 +7,12 @@ const multer = require("multer");
 const upload = multer({ storage: multer.memoryStorage() });
 var admin = require("firebase-admin");
 
-const offers = firestore.collection("Offers");
+const News = firestore.collection("News");
 webApp.locals.bucket = admin.storage().bucket();
 /*
-create offer 
+create News  
 **/
-const createOffer = async (req, res, body) => {
+const createNews = async (req, res, body) => {
   try {
     if (req.file) {
       const name = saltedMd5(req.file.originalname, "SUPER-S@LT!");
@@ -22,41 +22,38 @@ const createOffer = async (req, res, body) => {
         .createWriteStream()
         .end(req.file.buffer);
       const file = `https://firebasestorage.googleapis.com/v0/b/ipodekho-19fc1.appspot.com/o/${fileName}?alt=media&token=11c648b5-a554-401c-bc4e-ba9155f29744`;
-      const OfferIPO = {
-        offerTitle: req.body.offerTitle || "",
-        offerDescription: req.body.offerDescription || "",
-        offerSequence: req.body.offerSequence || "",
-        offerStatus: req.body.offerStatus || "",
+      const newsIPO = {
+        Date: req.body.Date || "",
+        Title: req.body.Title || "",
+        Content: req.body.Content || "",
         createdAt: new Date(),
         file: file,
       };
 
-      if (OfferIPO) {
-        await offers.add(OfferIPO);
-        //  ({ ignoreUndefinedProperties: true })
+      if (newsIPO) {
+        await News.add(newsIPO);
         res.status(200).send({
           msg: "Offer Created Successfully",
-          data: OfferIPO,
+          data: newsIPO,
         });
       } else {
         res.status(300).send({ msg: "Offer Not Created" });
       }
     } else {
       const Data = {
-        offerTitle: req.body.offerTitle || "",
-        offerDescription: req.body.offerDescription || "",
-        offerSequence: req.body.offerSequence || "",
-        offerStatus: req.body.offerStatus || "",
+        Date: req.body.Date || "",
+        Title: req.body.Title || "",
+        Content: req.body.Content || "",
         createdAt: new Date(),
       };
       if (Data) {
-        await offers.add(Data);
+        await News.add(Data);
         res.status(200).send({
-          msg: "Offer Created Successfully",
+          msg: "News Created Successfully",
           data: Data,
         });
       } else {
-        res.status(300).send({ msg: "Offer Not Found" });
+        res.status(300).send({ msg: "News Not Found" });
       }
     }
   } catch (error) {
@@ -65,26 +62,26 @@ const createOffer = async (req, res, body) => {
   }
 };
 /*
-update offer 
+update News 
 **/
-const UpdateOffer = async (req, res) => {
+const UpdateNews = async (req, res) => {
   const id = req.params.id;
   delete req.params.id;
-  const GetOffer = offers.doc(id);
+  const GetNews = News.doc(id);
 
-  const GetData = await GetOffer.get();
+  const GetData = await GetNews.get();
   const data = req.body;
   if (GetData.exists) {
-    await offers.doc(id).update(data, { new: true });
-    res.status(200).send({ msg: "Offer updated Successfully", data: data });
+    await News.doc(id).update(data, { new: true });
+    res.status(200).send({ msg: "News updated Successfully", data: data });
   } else {
     res.status(300).send({ msg: "UserId Not Found" });
   }
 };
 /*
-update offer-Image 
+update News-Image 
 **/
-const updateImage = async (req, res) => {
+const updateNewsImage = async (req, res) => {
   try {
     const name = saltedMd5(req.file.originalname, "SUPER-S@LT!");
     const fileName = name + path.extname(req.file.originalname);
@@ -93,16 +90,14 @@ const updateImage = async (req, res) => {
       .createWriteStream()
       .end(req.file.buffer);
     const id = req.params.id;
-    const GetOffer = offers.doc(id);
-    const GetData = await GetOffer.get();
-    const file =
-      `https://firebasestorage.googleapis.com/v0/b/ipodekho-19fc1.appspot.com/o/${fileName}?alt=media&token=11c648b5-a554-401c-bc4e-ba9155f29744` ||
-      "";
+    const GetNews = News.doc(id);
+    const GetData = await GetNews.get();
+    const file = `https://firebasestorage.googleapis.com/v0/b/ipodekho-19fc1.appspot.com/o/${fileName}?alt=media&token=11c648b5-a554-401c-bc4e-ba9155f29744`;
     if (GetData) {
-      await offers.doc(id).update({ file: file });
+      await News.doc(id).update({ file: file });
       res
         .status(200)
-        .send({ msg: "Offer-Image Updated Successfully", file: file });
+        .send({ msg: "News-Image Updated Successfully", file: file });
     } else {
       res.status(300).send({ msg: "User Not Found" });
     }
@@ -111,59 +106,49 @@ const updateImage = async (req, res) => {
   }
 };
 /*
-Get All offer 
+Get All News 
 **/
-const GetAllOffer = async (req, res) => {
-  const GetOffer = await offers
-    .select(
-      "offerTitle",
-      "offerDescription",
-      "offerSequence",
-      "offerStatus",
-      "file"
-    )
-    .get();
-  if (GetOffer) {
-    const GetOffers = GetOffer.docs.map((doc) => ({
+const GetAllNews = async (req, res) => {
+  const GetNews = await News.select("Date", "Title", "Content", "file").get();
+  if (GetNews) {
+    const GetAllNews = GetNews.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
     }));
-    res.status(200).send({ msg: "Get All Offers", data: GetOffers });
+    res.status(200).send({ msg: "Get All News", data: GetAllNews });
   } else {
-    res.status(300).send({ msg: "Offers Not Found" });
+    res.status(300).send({ msg: "News Not Found" });
   }
 };
 /*
-GetId By single offer Details
+GetId By single News Details
 **/
-const GetISingleOffer = async (req, res) => {
+const GetISingleNews = async (req, res) => {
   try {
     const id = req.params.id;
     var usersArray = [];
     let True = true;
-    const data = await offers.get().then((snapshot) => {
+    const data = await News.get().then((snapshot) => {
       snapshot.forEach((doc) => {
         if (doc.id === id && True) {
           True = false;
           const Data = doc.data(usersArray.id);
-          const offerTitle = Data.offerTitle;
-          const offerDescription = Data.offerDescription;
-          const offerSequence = Data.offerSequence;
-          const offerStatus = Data.offerStatus;
+          const Content = Data.Content;
           const file = Data.file;
+          const Date = Data.Date;
+          const Title = Data.Title;
           const id = doc.id;
           usersArray.push(doc.data());
-          const OfferData = {
+          const NewsData = {
             id,
-            offerTitle,
-            offerDescription,
-            offerSequence,
-            offerStatus,
+            Content,
+            Date,
+            Title,
             file,
           };
           res.status(200).send({
             msg: "Get Single Offer Successfully",
-            GetSingleOffer: OfferData,
+            GetSingleNews: NewsData,
           });
         }
       });
@@ -184,22 +169,22 @@ const GetISingleOffer = async (req, res) => {
 /*
 Deleted single offer Detail
 **/
-const DeleteOffer = async (req, res) => {
+const DeleteNews = async (req, res) => {
   const id = req.params.id;
-  const GetOffer = offers.doc(id);
-  const GetData = await GetOffer.get();
+  const GetNews = News.doc(id);
+  const GetData = await GetNews.get();
   if (GetData.exists) {
-    await offers.doc(id).delete();
-    res.status(200).send({ msg: "Offer Deleted Successfully" });
+    await News.doc(id).delete();
+    res.status(200).send({ msg: "News Deleted Successfully" });
   } else {
     res.status(400).send({ msg: "Oops! User Not Found" });
   }
 };
 module.exports = {
-  createOffer,
-  UpdateOffer,
-  updateImage,
-  GetAllOffer,
-  GetISingleOffer,
-  DeleteOffer,
+  createNews,
+  UpdateNews,
+  updateNewsImage,
+  GetAllNews,
+  GetISingleNews,
+  DeleteNews,
 };
