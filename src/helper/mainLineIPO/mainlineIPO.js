@@ -276,119 +276,221 @@ const createMainlineIPO = async (req, res, body) => {
   }
 };
 /* 
-Get All MainLineIPO List 
+Get All IPO List With Search,Filter
 **/
 const GetMainLineIpo = async (req, res) => {
   try {
     let query = {};
     const CategoryForIPOS = req.body.CategoryForIPOS;
+    const keyword = req.body.keyword;
+    const Filter = req.body.Filter;
     const Pagination = req.query.Pagination;
     const GetTotal = await userInformation.get().then((querySnapshot) => {
       let TotalUsers = querySnapshot.size;
       console.log(TotalUsers);
     });
-    const GetIpo = await userInformation
-      .where("CategoryForIPOS", "==", CategoryForIPOS)
-      .select(
-        "CategoryForIPOS",
-        "companyName",
-        "companyName",
-        "IPOOpenDate",
-        "IPOCloseDate",
-        "lotSize",
-        "GMPStatus",
-        "GMP",
-        "IPOStatus",
-        "fromPrice",
-        "toPrice",
-        "file"
-      )
-      .get();
-    if (GetIpo) {
-      const MainLineIpo = GetIpo.docs.map((doc) => ({
+    /* 
+    Search Data For IPO 
+    **/
+    if (req.body.keyword) {
+      const companyName1 = await userInformation
+        .where("CategoryForIPOS", "==", CategoryForIPOS)
+        .where("companyName", "==", keyword)
+        .get();
+      const SearchIpo = companyName1.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
-      res.status(200).send({ msg: "All MainLineIpo", data: MainLineIpo });
+
+      const fromPrice2 = await userInformation
+        .where("CategoryForIPOS", "==", CategoryForIPOS)
+        .where("fromPrice", "==", keyword)
+        .get();
+      const SearchIpo2 = fromPrice2.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      const toPrice3 = await userInformation
+        .where("CategoryForIPOS", "==", CategoryForIPOS)
+        .where("toPrice", "==", keyword)
+        .get();
+      const SearchIpo3 = toPrice3.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      const IPOStatus = await userInformation
+        .where("CategoryForIPOS", "==", CategoryForIPOS)
+        .where("IPOStatus", "==", keyword)
+        .get();
+      const SearchIpo4 = IPOStatus.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      const IPOOpenDate = await userInformation
+        .where("CategoryForIPOS", "==", CategoryForIPOS)
+        .where("IPOOpenDate", "==", keyword)
+        .get();
+      const SearchIpo5 = IPOOpenDate.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      const IPOCloseDate = await userInformation
+        .where("CategoryForIPOS", "==", CategoryForIPOS)
+        .where("IPOCloseDate", "==", keyword)
+        .get();
+      const SearchIpo6 = IPOCloseDate.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      const lotSize = await userInformation
+        .where("CategoryForIPOS", "==", CategoryForIPOS)
+        .where("lotSize", "==", keyword)
+        .get();
+      const SearchIpo7 = lotSize.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      if (SearchIpo.length > 0) {
+        res.status(200).send({ msg: "All MainLineIpo", data: SearchIpo });
+      } else if (SearchIpo2.length > 0) {
+        res.status(200).send({ msg: "All MainLineIpo", data: SearchIpo2 });
+      } else if (SearchIpo3.length > 0) {
+        res.status(200).send({ msg: "All MainLineIpo", data: SearchIpo3 });
+      } else if (SearchIpo4.length > 0) {
+        res.status(200).send({ msg: "All MainLineIpo", data: SearchIpo4 });
+      } else if (SearchIpo5.length > 0) {
+        res.status(200).send({ msg: "All MainLineIpo", data: SearchIpo5 });
+      } else if (SearchIpo6.length > 0) {
+        res.status(200).send({ msg: "All MainLineIpo", data: SearchIpo6 });
+      } else if (SearchIpo7.length > 0) {
+        res.status(200).send({ msg: "All MainLineIpo", data: SearchIpo7 });
+      }
+      /* 
+    Filter Data For IPO 
+    **/
+    } else if (req.body.Filter) {
+      const IPOStatus = await userInformation
+        .where("CategoryForIPOS", "==", CategoryForIPOS)
+        .where("IPOStatus", "==", Filter)
+        .get();
+      const SearchIpo4 = IPOStatus.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      res.status(200).send({ msg: "All MainLineIpo", data: SearchIpo4 });
     } else {
-      res.status(300).send({ msg: "MainLineIpo Not Found" });
+      /* 
+    GetAll
+    Data For IPO 
+    **/
+      const GetIpo = await userInformation
+        .where("CategoryForIPOS", "==", CategoryForIPOS)
+        .select(
+          "CategoryForIPOS",
+          "companyName",
+          "IPOOpenDate",
+          "IPOCloseDate",
+          "lotSize",
+          "GMPStatus",
+          "GMP",
+          "IPOStatus",
+          "fromPrice",
+          "toPrice",
+          "file"
+        )
+        .get();
+      if (GetIpo) {
+        const MainLineIpo = GetIpo.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+
+        res.status(200).send({ msg: "All MainLineIpo", data: MainLineIpo });
+      } else {
+        res.status(300).send({ msg: "MainLineIpo Not Found" });
+      }
     }
   } catch (error) {
     console.log(error, "error");
     res.status(400).send({ msg: "User Not Found" });
   }
-
-  // Function to retrieve data with pagination
-  // const getDataWithPagination = async (limit, pageNumber, nextPageToken) => {
-  //   const Pagination = req.query.Pagination;
-  //   let query = userInformation
-  //     .collection("MainLineIPO")
-  //     .limit(limit * pageNumber);
-
-  //   if (nextPageToken) {
-  //     // Start the query from the document specified in the nextPageToken
-  //     const doc = await userInformation
-  //       .collection("MainLineIPO")
-  //       .doc(nextPageToken)
-  //       .get();
-  //     query = query.startAfter(doc);
-  //   }
-  //   console.log(doc);
-  //   // Get the data from Firebase
-  //   const snap = await query.get();
-
-  //   // Get the last document from the query
-  //   const lastDoc = snap.docs[snap.docs.length - 1];
-
-  //   // Create the nextPageToken by getting the id of the last document
-  //   const nextPage = lastDoc ? lastDoc.id : null;
-
-  //   // Return the data and nextPageToken
-  //   return {
-  //     data: snap.docs
-  //       .slice((pageNumber - 1) * Pagination, pageNumber * Pagination)
-  //       .map((doc) => doc.data()),
-  //     nextPageToken: nextPage,
-  //   };
-  // };
-
-  // return GetIpo.get().then(function (documentSnapshots) {
-  //   // Get the last visible document
-  //   var lastVisible =
-  //     documentSnapshots.docs[documentSnapshots.docs.length - 1];
-  //   console.log("last", lastVisible);
-  //   var next = userInformation("MainLineIPO")
-  //     .startAfter(lastVisible)
-  //     .limit(Pagination);
-  //   console.log(next);
-  // });
-
-  //
-  // const result = await data.getMany();
-  // // return result
-  // return { total: total, data: result };
-  // if (GetIpo) {
-  //   const MainLineIpo = GetIpo.docs.map((doc) => ({
-  //     id: doc.id,
-  //     ...doc.data(),
-  //   }));
-  //   console.log(MainLineIpo);
-  //   // const companyName = req.body.companyName;
-  //   // if (namr) {
-  //   //   const MainLineIpo2 = companyName.docs.map((doc) => ({
-  //   //     namr: doc.companyName,
-  //   //     ...doc.data(),
-  //   //   }));
-  //   //   console.log(MainLineIpo2);
-  //   // }
-  //   res.status(200).send({
-  //     msg: `${CategoryForIPOS} All successfully`,
-  //     data: MainLineIpo,
-  //   });
-  // } else {
-  //   res.status(300).send({ msg: `${CategoryForIPOS} Not Found` });
-  // }
 };
+// Function to retrieve data with pagination
+// const getDataWithPagination = async (limit, pageNumber, nextPageToken) => {
+//   const Pagination = req.query.Pagination;
+//   let query = userInformation
+//     .collection("MainLineIPO")
+//     .limit(limit * pageNumber);
+
+//   if (nextPageToken) {
+//     // Start the query from the document specified in the nextPageToken
+//     const doc = await userInformation
+//       .collection("MainLineIPO")
+//       .doc(nextPageToken)
+//       .get();
+//     query = query.startAfter(doc);
+//   }
+//   console.log(doc);
+//   // Get the data from Firebase
+//   const snap = await query.get();
+
+//   // Get the last document from the query
+//   const lastDoc = snap.docs[snap.docs.length - 1];
+
+//   // Create the nextPageToken by getting the id of the last document
+//   const nextPage = lastDoc ? lastDoc.id : null;
+
+//   // Return the data and nextPageToken
+//   return {
+//     data: snap.docs
+//       .slice((pageNumber - 1) * Pagination, pageNumber * Pagination)
+//       .map((doc) => doc.data()),
+//     nextPageToken: nextPage,
+//   };
+// };
+
+// return GetIpo.get().then(function (documentSnapshots) {
+//   // Get the last visible document
+//   var lastVisible =
+//     documentSnapshots.docs[documentSnapshots.docs.length - 1];
+//   console.log("last", lastVisible);
+//   var next = userInformation("MainLineIPO")
+//     .startAfter(lastVisible)
+//     .limit(Pagination);
+//   console.log(next);
+// });
+
+//
+// const result = await data.getMany();
+// // return result
+// return { total: total, data: result };
+// if (GetIpo) {
+//   const MainLineIpo = GetIpo.docs.map((doc) => ({
+//     id: doc.id,
+//     ...doc.data(),
+//   }));
+//   console.log(MainLineIpo);
+//   // const companyName = req.body.companyName;
+//   // if (namr) {
+//   //   const MainLineIpo2 = companyName.docs.map((doc) => ({
+//   //     namr: doc.companyName,
+//   //     ...doc.data(),
+//   //   }));
+//   //   console.log(MainLineIpo2);
+//   // }
+//   res.status(200).send({
+//     msg: `${CategoryForIPOS} All successfully`,
+//     data: MainLineIpo,
+//   });
+// } else {
+//   res.status(300).send({ msg: `${CategoryForIPOS} Not Found` });
+// }
 
 // const GetMainLineIpo = async (req, res) => {
 //   try {
@@ -749,8 +851,11 @@ const uploadImage = async (req, res) => {
     const GetData = await GetIpo.get();
     const file = `https://firebasestorage.googleapis.com/v0/b/ipodekho-19fc1.appspot.com/o/${fileName}?alt=media&token=11c648b5-a554-401c-bc4e-ba9155f29744`;
     if (GetData.exists) {
+      const merged = Object.assign({ file: file, id: id });
       await userInformation.doc(id).update({ file: file });
-      res.status(200).send({ msg: "Image Uploaded Successfully", file: file });
+      res
+        .status(200)
+        .send({ msg: "Image Uploaded Successfully", file: merged });
     } else {
       console.log("hello");
       const name = saltedMd5(req.file.originalname, "SUPER-S@LT!");

@@ -30,8 +30,12 @@ admin.initializeApp({
 var bucket = admin.storage().bucket();
 const homeRoute = require("./src/routes/mainlineIPO/mainlineRoute");
 const offerRoute = require("./src/routes/offers/offerRoute");
+const newsRoute = require("./src/routes/NewsIPO/newsRoute");
+const ipoAllotmentTips = require("./src/routes/ipoAllotmentTips/ipoAllotmentTipsRoute");
 webApp.use(homeRoute.router);
 webApp.use("/offer", offerRoute.router);
+webApp.use("/news", newsRoute.router);
+webApp.use("/IPOAllotmentTips", ipoAllotmentTips.router);
 webApp.listen(PORT, () => {
   console.log(`Server is up and running at ${PORT}`);
 });

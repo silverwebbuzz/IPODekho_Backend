@@ -1,0 +1,14 @@
+{
+  "apps": [
+    {
+      "name": "IPODekho",
+      "script": "./index.js",
+      "watch": "true",
+      "instance": 1,
+      "exce_mode": "cluster",
+      "env": {
+        "PROJECT_ID": "ipodekho-19fc1"
+      }
+    }
+  ]
+}
