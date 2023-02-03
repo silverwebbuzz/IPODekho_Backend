@@ -115,7 +115,9 @@ const GetAllNews = async (req, res) => {
       id: doc.id,
       ...doc.data(),
     }));
-    res.status(200).send({ msg: "Get All News", data: GetAllNews });
+    res
+      .status(200)
+      .send({ msg: "Get All News Successfully", data: GetAllNews });
   } else {
     res.status(300).send({ msg: "News Not Found" });
   }
@@ -123,7 +125,7 @@ const GetAllNews = async (req, res) => {
 /*
 GetId By single News Details
 **/
-const GetISingleNews = async (req, res) => {
+const GetSingleNews = async (req, res) => {
   try {
     const id = req.params.id;
     var usersArray = [];
@@ -147,7 +149,7 @@ const GetISingleNews = async (req, res) => {
             file,
           };
           res.status(200).send({
-            msg: "Get Single Offer Successfully",
+            msg: "Get Single News Successfully",
             GetSingleNews: NewsData,
           });
         }
@@ -185,6 +187,6 @@ module.exports = {
   UpdateNews,
   updateNewsImage,
   GetAllNews,
-  GetISingleNews,
+  GetSingleNews,
   DeleteNews,
 };

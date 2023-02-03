@@ -9,7 +9,7 @@ const upload = multer({ storage: multer.memoryStorage() });
 router.post("/createNews", upload.single("file"), newsIPO.createNews);
 router.put("/UpdateNews/:id", newsIPO.UpdateNews);
 router.get("/GetAllNews", newsIPO.GetAllNews);
-router.get("/GetISingleNews/:id", newsIPO.GetISingleNews);
+router.get("/GetISingleNews/:id", newsIPO.GetSingleNews);
 router.delete("/DeleteNews/:id", newsIPO.DeleteNews);
 router.put(
   "/updateNewsImage/:id",
