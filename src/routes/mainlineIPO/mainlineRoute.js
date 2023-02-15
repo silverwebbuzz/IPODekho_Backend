@@ -20,6 +20,8 @@ router.get("/GetImage/:id", MainLineIPO.GetImage);
 router.put("/updateStatus/:id", MainLineIPO.updateStatus);
 router.get("/GetIMainLineIPOStatus/:id", MainLineIPO.GetIMainLineIPOStatus);
 router.get("/Pagination", MainLineIPO.Pagination);
+router.post("/message", MainLineIPO.message);
+router.get("/getMessage", MainLineIPO.getMessage);
 module.exports = {
   router,
 };

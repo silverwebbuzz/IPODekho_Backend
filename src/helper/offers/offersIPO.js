@@ -86,25 +86,44 @@ update offer-Image
 **/
 const updateImage = async (req, res) => {
   try {
-    const name = saltedMd5(req.file.originalname, "SUPER-S@LT!");
-    const fileName = name + path.extname(req.file.originalname);
-    await webApp.locals.bucket
-      .file(fileName)
-      .createWriteStream()
-      .end(req.file.buffer);
-    const id = req.params.id;
-    const GetOffer = offers.doc(id);
-    const GetData = await GetOffer.get();
-    const file =
-      `https://firebasestorage.googleapis.com/v0/b/ipodekho-19fc1.appspot.com/o/${fileName}?alt=media&token=11c648b5-a554-401c-bc4e-ba9155f29744` ||
-      "";
-    if (GetData) {
-      await offers.doc(id).update({ file: file });
-      res
-        .status(200)
-        .send({ msg: "Offer-Image Updated Successfully", file: file });
-    } else {
-      res.status(300).send({ msg: "User Not Found" });
+    if (req.file) {
+      const name = saltedMd5(req.file.originalname, "SUPER-S@LT!");
+      const fileName = name + path.extname(req.file.originalname);
+      await webApp.locals.bucket
+        .file(fileName)
+        .createWriteStream()
+        .end(req.file.buffer);
+      const id = req.params.id;
+      const GetOffer = offers.doc(id);
+      const GetData = await GetOffer.get();
+      const file =
+        `https://firebasestorage.googleapis.com/v0/b/ipodekho-19fc1.appspot.com/o/${fileName}?alt=media&token=11c648b5-a554-401c-bc4e-ba9155f29744` ||
+        "";
+      if (GetData) {
+        await offers.doc(id).update({ file: file });
+        res
+          .status(200)
+          .send({ msg: "Offer-Image Updated Successfully", file: file });
+      }
+    } else if (req.file == null) {
+      const id = req.params.id;
+      console.log(id);
+      delete req.params.id;
+      const GetOffers = offers.doc(id);
+
+      const GetData = await GetOffers.get();
+      const updateFile = {
+        file: "",
+        id: id,
+      };
+      if (GetData.exists) {
+        await offers.doc(id).update(updateFile, { new: true });
+        res
+          .status(200)
+          .send({ msg: "Image Updated Successfully", data: updateFile });
+      } else {
+        res.status(300).send({ msg: "Image Not Found" });
+      }
     }
   } catch (error) {
     res.status(400).send({ msg: "User Not Found" });

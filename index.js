@@ -32,10 +32,23 @@ const homeRoute = require("./src/routes/mainlineIPO/mainlineRoute");
 const offerRoute = require("./src/routes/offers/offerRoute");
 const newsRoute = require("./src/routes/NewsIPO/newsRoute");
 const ipoAllotmentTips = require("./src/routes/ipoAllotmentTips/ipoAllotmentTipsRoute");
+const faqs = require("./src/routes/faqs/faqsRoute");
+const privacyPolicy = require("./src/routes/privacyPolicy/privacyPolicyRoute");
+const termsAndCondition = require("./src/routes/TermsAndCondition/TermsAndConditionRoute");
+const notification = require("./src/routes/Notification/notificationRoute");
+const user = require("./src/routes/user/userRoute");
+const contact = require("./src/routes/ContactIPO/contactRoute");
 webApp.use(homeRoute.router);
 webApp.use("/offer", offerRoute.router);
 webApp.use("/news", newsRoute.router);
 webApp.use("/IPOAllotmentTips", ipoAllotmentTips.router);
+webApp.use("/Faqs", faqs.router);
+webApp.use("/privacyPolicy", privacyPolicy.router);
+webApp.use("/termsAndCondition", termsAndCondition.router);
+webApp.use("/user", user.router);
+webApp.use("/contact", contact.router);
+
+webApp.use("/Notification", notification.router);
 webApp.listen(PORT, () => {
   console.log(`Server is up and running at ${PORT}`);
 });
