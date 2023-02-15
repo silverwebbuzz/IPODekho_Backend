@@ -214,8 +214,7 @@ const GetMainLineIpo = async (req, res) => {
         );
       // .get();
       // function paginateNext() {
-      GetIpo.orderBy("")
-        .offset(Number(page - 1) * limit)
+      GetIpo.offset(Number(page - 1) * limit)
         .limit(Number(limit))
         .get()
         .then((querySnapshot) => {
