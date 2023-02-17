@@ -132,18 +132,50 @@ const updateNewsImage = async (req, res) => {
 Get All News 
 **/
 const GetAllNews = async (req, res) => {
-  const GetNews = await News.select("Date", "Title", "Content", "file").get();
+  const limit = req.query.limit || 2;
+  let offset = req.query.offset || 2; // initial offset
+  let page = req.query.page || 3;
+  const GetNews = await News.select("Date", "Title", "Content", "file");
   if (GetNews) {
-    const GetAllNews = GetNews.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
-    res
-      .status(200)
-      .send({ msg: "Get All News Successfully", data: GetAllNews });
+    GetNews.offset(Number(page - 1) * limit)
+      .limit(Number(limit))
+      .get()
+      .then((querySnapshot) => {
+        if (querySnapshot.size === 0) {
+          // No more documents left
+          console.log("No more documents left");
+          res.status(200).send({ msg: "No more documents left" });
+          return;
+        }
+        console.log(`Page ${page}:`);
+        const AllNews = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        News.get().then((querySnapshot) => {
+          let Total = querySnapshot.size;
+          // console.log(TotalUsers);
+          const Merged = { AllNews, Total };
+          res
+            .status(200)
+            .send({ msg: "All News Get Successfully", data: Merged });
+        });
+      });
   } else {
-    res.status(300).send({ msg: "News Not Found" });
+    res.status(200).send({ msg: "Not Get All News", data: Merged });
   }
+
+  // if (GetNews) {
+  //   const GetAllNews = GetNews.docs.map((doc) => ({
+  //     id: doc.id,
+  //     ...doc.data(),
+  //   }));
+  //   res
+  //     .status(200)
+  //     .send({ msg: "Get All News Successfully", data: GetAllNews });
+  // } else {
+  //   res.status(300).send({ msg: "News Not Found" });
+  // }
 };
 /*
 GetId By single News Details

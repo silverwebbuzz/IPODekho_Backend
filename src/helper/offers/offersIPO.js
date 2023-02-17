@@ -133,23 +133,44 @@ const updateImage = async (req, res) => {
 Get All offer 
 **/
 const GetAllOffer = async (req, res) => {
-  const GetOffer = await offers
-    .select(
-      "offerTitle",
-      "offerDescription",
-      "offerSequence",
-      "offerStatus",
-      "file"
-    )
-    .get();
+  const limit = req.query.limit || 2;
+  let offset = req.query.offset || 2; // initial offset
+  let page = req.query.page || 3;
+  const GetOffer = await offers.select(
+    "offerTitle",
+    "offerDescription",
+    "offerSequence",
+    "offerStatus",
+    "file"
+  );
+
   if (GetOffer) {
-    const GetOffers = GetOffer.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
-    res.status(200).send({ msg: "Get All Offers", data: GetOffers });
+    GetOffer.offset(Number(page - 1) * limit)
+      .limit(Number(limit))
+      .get()
+      .then((querySnapshot) => {
+        if (querySnapshot.size === 0) {
+          // No more documents left
+          console.log("No more documents left");
+          res.status(200).send({ msg: "No more documents left" });
+          return;
+        }
+        console.log(`Page ${page}:`);
+        const AllOffers = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        offers.get().then((querySnapshot) => {
+          let Total = querySnapshot.size;
+          // console.log(TotalUsers);
+          const Merged = { AllOffers, Total };
+          res
+            .status(200)
+            .send({ msg: "All Offers Get Successfully", data: Merged });
+        });
+      });
   } else {
-    res.status(300).send({ msg: "Offers Not Found" });
+    res.status(200).send({ msg: "Not Get All Offers", data: Merged });
   }
 };
 /*

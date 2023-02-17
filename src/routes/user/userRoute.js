@@ -11,7 +11,7 @@ router.post(
   upload.single("photoURL"),
   user.UpdateProfile
 );
-
+// router.delete("/DeleteProfile/:id", user.DeleteProfilePic);
 module.exports = {
   router,
 };

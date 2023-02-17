@@ -101,7 +101,6 @@ const GetMainLineIpo = async (req, res) => {
     const keyword = req.body.keyword;
     const Filter = req.body.Filter;
     const Pagination = req.query.Pagination;
-
     /*
       Search Data For IPO
       **/
@@ -110,6 +109,8 @@ const GetMainLineIpo = async (req, res) => {
         .where("CategoryForIPOS", "==", CategoryForIPOS)
         // .orderBy("companyName", "asc")
         .where("companyName", "==", keyword)
+        .offset(Number(page - 1) * limit)
+        .limit(Number(limit))
         .get();
       const SearchIpo = companyName1.docs.map((doc) => ({
         id: doc.id,
@@ -118,6 +119,8 @@ const GetMainLineIpo = async (req, res) => {
       const fromPrice2 = await userInformation
         .where("CategoryForIPOS", "==", CategoryForIPOS)
         .where("fromPrice", "==", keyword)
+        .offset(Number(page - 1) * limit)
+        .limit(Number(limit))
         .get();
       const SearchIpo2 = fromPrice2.docs.map((doc) => ({
         id: doc.id,
@@ -126,6 +129,8 @@ const GetMainLineIpo = async (req, res) => {
       const toPrice3 = await userInformation
         .where("CategoryForIPOS", "==", CategoryForIPOS)
         .where("toPrice", "==", keyword)
+        .offset(Number(page - 1) * limit)
+        .limit(Number(limit))
         .get();
       const SearchIpo3 = toPrice3.docs.map((doc) => ({
         id: doc.id,
@@ -134,6 +139,8 @@ const GetMainLineIpo = async (req, res) => {
       const IPOStatus = await userInformation
         .where("CategoryForIPOS", "==", CategoryForIPOS)
         .where("IPOStatus", "==", keyword)
+        .offset(Number(page - 1) * limit)
+        .limit(Number(limit))
         .get();
       const SearchIpo4 = IPOStatus.docs.map((doc) => ({
         id: doc.id,
@@ -142,6 +149,8 @@ const GetMainLineIpo = async (req, res) => {
       const IPOOpenDate = await userInformation
         .where("CategoryForIPOS", "==", CategoryForIPOS)
         .where("IPOOpenDate", "==", keyword)
+        .offset(Number(page - 1) * limit)
+        .limit(Number(limit))
         .get();
       const SearchIpo5 = IPOOpenDate.docs.map((doc) => ({
         id: doc.id,
@@ -150,6 +159,8 @@ const GetMainLineIpo = async (req, res) => {
       const IPOCloseDate = await userInformation
         .where("CategoryForIPOS", "==", CategoryForIPOS)
         .where("IPOCloseDate", "==", keyword)
+        .offset(Number(page - 1) * limit)
+        .limit(Number(limit))
         .get();
       const SearchIpo6 = IPOCloseDate.docs.map((doc) => ({
         id: doc.id,
@@ -158,6 +169,8 @@ const GetMainLineIpo = async (req, res) => {
       const lotSize = await userInformation
         .where("CategoryForIPOS", "==", CategoryForIPOS)
         .where("lotSize", "==", keyword)
+        .offset(Number(page - 1) * limit)
+        .limit(Number(limit))
         .get();
       const SearchIpo7 = lotSize.docs.map((doc) => ({
         id: doc.id,
@@ -185,6 +198,21 @@ const GetMainLineIpo = async (req, res) => {
       const IPOStatus = await userInformation
         .where("CategoryForIPOS", "==", CategoryForIPOS)
         .where("IPOStatus", "==", Filter)
+        .select(
+          "CategoryForIPOS",
+          "companyName",
+          "IPOOpenDate",
+          "IPOCloseDate",
+          "lotSize",
+          "GMPStatus",
+          "GMP",
+          "IPOStatus",
+          "fromPrice",
+          "toPrice",
+          "file"
+        )
+        .offset(Number(page - 1) * limit)
+        .limit(Number(limit))
         .get();
       const SearchIpo4 = IPOStatus.docs.map((doc) => ({
         id: doc.id,
@@ -198,7 +226,6 @@ const GetMainLineIpo = async (req, res) => {
       **/
       const GetIpo = await userInformation
         .where("CategoryForIPOS", "==", CategoryForIPOS)
-
         .select(
           "CategoryForIPOS",
           "companyName",
@@ -233,7 +260,7 @@ const GetMainLineIpo = async (req, res) => {
             let Total = querySnapshot.size;
             // console.log(TotalUsers);
             const Merged = { MainLineIpo, Total };
-            res.status(200).send({ msg: "All MainLineIpo", data: Merged });
+            res.status(200).send({ msg: "All IPOS", data: Merged });
           });
           // console.log(total);
 
@@ -258,7 +285,6 @@ const GetMainLineIpo = async (req, res) => {
 //   let query = userInformation
 //     .collection("MainLineIPO")
 //     .limit(limit * pageNumber);
-
 //   if (nextPageToken) {
 //     // Start the query from the document specified in the nextPageToken
 //     const doc = await userInformation
@@ -724,7 +750,6 @@ const uploadImage = async (req, res) => {
         file: "",
         id: id,
       };
-
       if (GetData.exists) {
         await userInformation.doc(id).update(updateFile, { new: true });
 

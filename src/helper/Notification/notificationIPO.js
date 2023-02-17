@@ -34,22 +34,41 @@ const createNotification = async (req, res, body) => {
 Get All Notification 
 **/
 const GetAllNotification = async (req, res) => {
+  const limit = req.query.limit || 2;
+  let offset = req.query.offset || 2; // initial offset
+  let page = req.query.page || 3;
   const GetNotification = await Notification.select(
     "notificationTitle",
     "notificationDescription",
     "Redirect"
-  ).get();
+  );
   if (GetNotification) {
-    const GetAllNotification = GetNotification.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
-    res.status(200).send({
-      msg: "Get All Notification Successfully",
-      data: GetAllNotification,
-    });
+    GetNotification.offset(Number(page - 1) * limit)
+      .limit(Number(limit))
+      .get()
+      .then((querySnapshot) => {
+        if (querySnapshot.size === 0) {
+          // No more documents left
+          console.log("No more documents left");
+          res.status(200).send({ msg: "No more documents left" });
+          return;
+        }
+        console.log(`Page ${page}:`);
+        const AllNotification = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        Notification.get().then((querySnapshot) => {
+          let Total = querySnapshot.size;
+          // console.log(TotalUsers);
+          const Merged = { AllNotification, Total };
+          res
+            .status(200)
+            .send({ msg: "Notification Get Successfully", data: Merged });
+        });
+      });
   } else {
-    res.status(300).send({ msg: "Notification Not Found" });
+    res.status(200).send({ msg: "Not Get All Notification", data: Merged });
   }
 };
 /*
