@@ -34,41 +34,88 @@ const createNotification = async (req, res, body) => {
 Get All Notification 
 **/
 const GetAllNotification = async (req, res) => {
-  const limit = req.query.limit || 2;
-  let offset = req.query.offset || 2; // initial offset
-  let page = req.query.page || 3;
-  const GetNotification = await Notification.select(
-    "notificationTitle",
-    "notificationDescription",
-    "Redirect"
-  );
-  if (GetNotification) {
-    GetNotification.offset(Number(page - 1) * limit)
-      .limit(Number(limit))
-      .get()
-      .then((querySnapshot) => {
-        if (querySnapshot.size === 0) {
-          // No more documents left
-          console.log("No more documents left");
-          res.status(200).send({ msg: "No more documents left" });
-          return;
-        }
-        console.log(`Page ${page}:`);
-        const AllNotification = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        Notification.get().then((querySnapshot) => {
-          let Total = querySnapshot.size;
-          // console.log(TotalUsers);
-          const Merged = { AllNotification, Total };
-          res
-            .status(200)
-            .send({ msg: "Notification Get Successfully", data: Merged });
-        });
-      });
-  } else {
-    res.status(200).send({ msg: "Not Get All Notification", data: Merged });
+  try {
+    const limit = req.query.limit || 2;
+    let offset = req.query.offset || 2; // initial offset
+    let page = req.query.page || 3;
+
+    const keyword = req.body.keyword;
+    if (req.body.keyword) {
+      const NotificationTitle = await Notification.where(
+        "notificationTitle",
+        "==",
+        keyword
+      )
+        .offset(Number(page - 1) * limit)
+        .limit(Number(limit))
+        .get();
+      const SearchIpo = NotificationTitle.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      const redirect = await Notification.where("Redirect", "==", keyword)
+        .offset(Number(page - 1) * limit)
+        .limit(Number(limit))
+        .get();
+      const SearchIpo2 = redirect.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      const Date = await Notification.where("createdAt", "==", keyword)
+        .offset(Number(page - 1) * limit)
+        .limit(Number(limit))
+        .get();
+      const SearchIpo3 = Date.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      if (SearchIpo.length > null) {
+        res.status(200).send({ msg: "Search Notification", data: SearchIpo });
+      } else if (SearchIpo2.length > 0) {
+        res.status(200).send({ msg: "Search Notification", data: SearchIpo2 });
+      } else if (SearchIpo3.length > 0) {
+        res.status(200).send({ msg: "Search Notification", data: SearchIpo3 });
+      } else {
+        res.status(200).send({ msg: "Not Keyword Found" });
+      }
+    } else {
+      const GetNotification = await Notification.select(
+        "notificationTitle",
+        "notificationDescription",
+        "Redirect",
+        "createdAt"
+      );
+      if (GetNotification) {
+        GetNotification.offset(Number(page - 1) * limit)
+          .limit(Number(limit))
+          .get()
+          .then((querySnapshot) => {
+            if (querySnapshot.size === 0) {
+              // No more documents left
+              console.log("No more documents left");
+              res.status(200).send({ msg: "No more documents left" });
+              return;
+            }
+            console.log(`Page ${page}:`);
+            const AllNotification = querySnapshot.docs.map((doc) => ({
+              id: doc.id,
+              ...doc.data(),
+            }));
+            Notification.get().then((querySnapshot) => {
+              let Total = querySnapshot.size;
+              // console.log(TotalUsers);
+              const Merged = { AllNotification, Total };
+              res
+                .status(200)
+                .send({ msg: "Notification Get Successfully", data: Merged });
+            });
+          });
+      } else {
+        res.status(200).send({ msg: "Not Get All Notification", data: Merged });
+      }
+    }
+  } catch (error) {
+    res.status(400).send({ msg: "User Not Found" });
   }
 };
 /*

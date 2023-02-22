@@ -26,6 +26,7 @@ const createNews = async (req, res, body) => {
         Date: req.body.Date || "",
         Title: req.body.Title || "",
         Content: req.body.Content || "",
+        url: req.body.url || "",
         createdAt: new Date(),
         file: file,
       };
@@ -44,6 +45,7 @@ const createNews = async (req, res, body) => {
         Date: req.body.Date || "",
         Title: req.body.Title || "",
         Content: req.body.Content || "",
+        url: req.body.url || "",
         createdAt: new Date(),
       };
       if (Data) {
@@ -132,51 +134,88 @@ const updateNewsImage = async (req, res) => {
 Get All News 
 **/
 const GetAllNews = async (req, res) => {
-  const limit = req.query.limit || 2;
-  let offset = req.query.offset || 2; // initial offset
-  let page = req.query.page || 3;
-  const GetNews = await News.select("Date", "Title", "Content", "file");
-  if (GetNews) {
-    GetNews.offset(Number(page - 1) * limit)
-      .limit(Number(limit))
-      .get()
-      .then((querySnapshot) => {
-        if (querySnapshot.size === 0) {
-          // No more documents left
-          console.log("No more documents left");
-          res.status(200).send({ msg: "No more documents left" });
-          return;
-        }
-        console.log(`Page ${page}:`);
-        const AllNews = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        News.get().then((querySnapshot) => {
-          let Total = querySnapshot.size;
-          // console.log(TotalUsers);
-          const Merged = { AllNews, Total };
-          res
-            .status(200)
-            .send({ msg: "All News Get Successfully", data: Merged });
-        });
-      });
-  } else {
-    res.status(200).send({ msg: "Not Get All News", data: Merged });
-  }
+  try {
+    const limit = req.query.limit || 2;
+    let page = req.query.page || 3;
+    const keyword = req.body.keyword;
+    if (req.body.keyword) {
+      const date = await News.where("Date", "==", keyword)
+        .offset(Number(page - 1) * limit)
+        .limit(Number(limit))
+        .get();
+      const SearchIpo = date.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      const title = await News.where("Title", "==", keyword)
+        .offset(Number(page - 1) * limit)
+        .limit(Number(limit))
+        .get();
+      const SearchIpo2 = title.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
 
-  // if (GetNews) {
-  //   const GetAllNews = GetNews.docs.map((doc) => ({
-  //     id: doc.id,
-  //     ...doc.data(),
-  //   }));
-  //   res
-  //     .status(200)
-  //     .send({ msg: "Get All News Successfully", data: GetAllNews });
-  // } else {
-  //   res.status(300).send({ msg: "News Not Found" });
-  // }
+      if (SearchIpo.length > null) {
+        res.status(200).send({ msg: "Search News", data: SearchIpo });
+      } else if (SearchIpo2.length > 0) {
+        res.status(200).send({ msg: "Search News", data: SearchIpo2 });
+      } else {
+        res.status(200).send({ msg: "Not Keyword Found" });
+      }
+    } else {
+      const GetNews = await News.select(
+        "Date",
+        "Title",
+        "Content",
+        "file",
+        "createdAt"
+      );
+      if (GetNews) {
+        GetNews.offset(Number(page - 1) * limit)
+          .limit(Number(limit))
+          .get()
+          .then((querySnapshot) => {
+            if (querySnapshot.size === 0) {
+              // No more documents left
+              console.log("No more documents left");
+              res.status(200).send({ msg: "No more documents left" });
+              return;
+            }
+            console.log(`Page ${page}:`);
+            const AllNews = querySnapshot.docs.map((doc) => ({
+              id: doc.id,
+              ...doc.data(),
+            }));
+            News.get().then((querySnapshot) => {
+              let Total = querySnapshot.size;
+              // console.log(TotalUsers);
+              const Merged = { AllNews, Total };
+              res
+                .status(200)
+                .send({ msg: "All News Get Successfully", data: Merged });
+            });
+          });
+      } else {
+        res.status(200).send({ msg: "Not Get All News", data: Merged });
+      }
+    }
+  } catch (error) {
+    res.status(400).send({ msg: "User Not Found" });
+  }
 };
+// if (GetNews) {
+//   const GetAllNews = GetNews.docs.map((doc) => ({
+//     id: doc.id,
+//     ...doc.data(),
+//   }));
+//   res
+//     .status(200)
+//     .send({ msg: "Get All News Successfully", data: GetAllNews });
+// } else {
+//   res.status(300).send({ msg: "News Not Found" });
+// }
+
 /*
 GetId By single News Details
 **/
@@ -195,6 +234,7 @@ const GetSingleNews = async (req, res) => {
           const Date = Data.Date;
           const Title = Data.Title;
           const id = doc.id;
+          const url = Data.url;
           usersArray.push(doc.data());
           const NewsData = {
             id,
@@ -202,6 +242,7 @@ const GetSingleNews = async (req, res) => {
             Date,
             Title,
             file,
+            url,
           };
           res.status(200).send({
             msg: "Get Single News Successfully",

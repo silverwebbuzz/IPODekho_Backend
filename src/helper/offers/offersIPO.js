@@ -27,6 +27,7 @@ const createOffer = async (req, res, body) => {
         offerDescription: req.body.offerDescription || "",
         offerSequence: req.body.offerSequence || "",
         offerStatus: req.body.offerStatus || "",
+        url: req.body.url || "",
         createdAt: new Date(),
         file: file,
       };
@@ -47,6 +48,7 @@ const createOffer = async (req, res, body) => {
         offerDescription: req.body.offerDescription || "",
         offerSequence: req.body.offerSequence || "",
         offerStatus: req.body.offerStatus || "",
+        url: req.body.url || "",
         createdAt: new Date(),
       };
       if (Data) {
@@ -133,44 +135,89 @@ const updateImage = async (req, res) => {
 Get All offer 
 **/
 const GetAllOffer = async (req, res) => {
-  const limit = req.query.limit || 2;
-  let offset = req.query.offset || 2; // initial offset
-  let page = req.query.page || 3;
-  const GetOffer = await offers.select(
-    "offerTitle",
-    "offerDescription",
-    "offerSequence",
-    "offerStatus",
-    "file"
-  );
+  try {
+    const limit = req.query.limit || 2;
+    let offset = req.query.offset || 2; // initial offset
+    let page = req.query.page || 3;
+    const keyword = req.body.keyword;
+    if (req.body.keyword) {
+      const OfferTitle = await offers
+        .where("offerTitle", "==", keyword)
+        .offset(Number(page - 1) * limit)
+        .limit(Number(limit))
+        .get();
+      const SearchIpo = OfferTitle.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      const OfferSequence = await offers
+        .where("offerSequence", "==", keyword)
+        .offset(Number(page - 1) * limit)
+        .limit(Number(limit))
+        .get();
+      const SearchIpo2 = OfferSequence.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      const OfferStatus = await offers
+        .where("offerStatus", "==", keyword)
+        .offset(Number(page - 1) * limit)
+        .limit(Number(limit))
+        .get();
+      const SearchIpo3 = OfferStatus.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      if (SearchIpo.length > null) {
+        res.status(200).send({ msg: "Search Offers", data: SearchIpo });
+      } else if (SearchIpo2.length > 0) {
+        res.status(200).send({ msg: "Search Offers", data: SearchIpo2 });
+      } else if (SearchIpo3.length > 0) {
+        res.status(200).send({ msg: "Search Offers", data: SearchIpo3 });
+      } else {
+        res.status(200).send({ msg: "Not Keyword Found" });
+      }
+    } else {
+      const GetOffer = await offers.select(
+        "offerTitle",
+        "offerDescription",
+        "offerSequence",
+        "url",
+        "offerStatus",
+        "file"
+      );
 
-  if (GetOffer) {
-    GetOffer.offset(Number(page - 1) * limit)
-      .limit(Number(limit))
-      .get()
-      .then((querySnapshot) => {
-        if (querySnapshot.size === 0) {
-          // No more documents left
-          console.log("No more documents left");
-          res.status(200).send({ msg: "No more documents left" });
-          return;
-        }
-        console.log(`Page ${page}:`);
-        const AllOffers = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        offers.get().then((querySnapshot) => {
-          let Total = querySnapshot.size;
-          // console.log(TotalUsers);
-          const Merged = { AllOffers, Total };
-          res
-            .status(200)
-            .send({ msg: "All Offers Get Successfully", data: Merged });
-        });
-      });
-  } else {
-    res.status(200).send({ msg: "Not Get All Offers", data: Merged });
+      if (GetOffer) {
+        GetOffer.offset(Number(page - 1) * limit)
+          .limit(Number(limit))
+          .get()
+          .then((querySnapshot) => {
+            if (querySnapshot.size === 0) {
+              // No more documents left
+              console.log("No more documents left");
+              res.status(200).send({ msg: "No more documents left" });
+              return;
+            }
+            console.log(`Page ${page}:`);
+            const AllOffers = querySnapshot.docs.map((doc) => ({
+              id: doc.id,
+              ...doc.data(),
+            }));
+            offers.get().then((querySnapshot) => {
+              let Total = querySnapshot.size;
+              // console.log(TotalUsers);
+              const Merged = { AllOffers, Total };
+              res
+                .status(200)
+                .send({ msg: "All Offers Get Successfully", data: Merged });
+            });
+          });
+      } else {
+        res.status(200).send({ msg: "Not Get All Offers", data: Merged });
+      }
+    }
+  } catch (error) {
+    res.status(400).send(error);
   }
 };
 /*
@@ -189,6 +236,7 @@ const GetISingleOffer = async (req, res) => {
           const offerTitle = Data.offerTitle;
           const offerDescription = Data.offerDescription;
           const offerSequence = Data.offerSequence;
+          const url = Data.url;
           const offerStatus = Data.offerStatus;
           const file = Data.file;
           const id = doc.id;
@@ -198,6 +246,7 @@ const GetISingleOffer = async (req, res) => {
             offerTitle,
             offerDescription,
             offerSequence,
+            url,
             offerStatus,
             file,
           };

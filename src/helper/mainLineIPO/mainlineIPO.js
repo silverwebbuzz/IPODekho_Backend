@@ -24,7 +24,7 @@ const createMainlineIPO = async (req, res, body) => {
 
     if (GetData.exists) {
       const updatedAt = new Date();
-      const Merged = { GeneralIPO, updatedAt };
+      const Merged = { ...GeneralIPO, updatedAt };
       await userInformation.doc(id).update(Merged, { new: true });
       res.status(200).send({
         msg: `${GeneralIPO.CategoryForIPOS} Updated Successfully`,
@@ -34,7 +34,7 @@ const createMainlineIPO = async (req, res, body) => {
       const GeneralIPOData = req.body;
       if (GeneralIPOData) {
         const createdAt = new Date();
-        const Merged = { GeneralIPOData, createdAt };
+        const Merged = { ...GeneralIPOData, createdAt };
         const id = await userInformation.add(Merged);
         const ids = { id: id.id };
         const CreatedAt = { createdAt: createdAt };
@@ -95,7 +95,7 @@ Get All IPO List With Search,Filter
 const GetMainLineIpo = async (req, res) => {
   try {
     const limit = req.query.limit || 10;
-    let offset = req.query.offset || 2; // initial offset
+    // let offset = req.query.offset || 2; // initial offset
     let page = req.query.page || 1; // initial page
     const CategoryForIPOS = req.body.CategoryForIPOS;
     const keyword = req.body.keyword;
@@ -190,6 +190,8 @@ const GetMainLineIpo = async (req, res) => {
         res.status(200).send({ msg: "All Ipo", data: SearchIpo6 });
       } else if (SearchIpo7.length > 0) {
         res.status(200).send({ msg: "All Ipo", data: SearchIpo7 });
+      } else {
+        res.status(200).send({ msg: "Keyword Not Found" });
       }
       /*
       Filter Data For IPO
@@ -210,16 +212,40 @@ const GetMainLineIpo = async (req, res) => {
           "fromPrice",
           "toPrice",
           "file"
-        )
-        .offset(Number(page - 1) * limit)
+        );
+      IPOStatus.offset(Number(page - 1) * limit)
         .limit(Number(limit))
-        .get();
-      const SearchIpo4 = IPOStatus.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      res.status(200).send({ msg: "All MainLineIpo", data: SearchIpo4 });
-    } else {
+        .get()
+        .then((querySnapshot) => {
+          if (querySnapshot.size === 0) {
+            // No more documents left
+            console.log("No more documents left");
+            res.status(200).send({ msg: "No more documents left" });
+            return;
+          }
+          console.log(`Page ${page}:`);
+          const MainLineIpo = querySnapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+          IPOStatus.get().then((querySnapshot) => {
+            let Total = querySnapshot.size;
+            const Merged = { MainLineIpo, Total };
+            res.status(200).send({ msg: "All IPOS", data: Merged });
+          });
+        });
+    }
+    //     .offset(Number(page - 1) * limit)
+    //     .limit(Number(limit))
+    //     .get();
+    //   const SearchIpo4 = IPOStatus.docs.map((doc) => ({
+    //     id: doc.id,
+    //     ...doc.data(),
+    //   }));
+    //   const MainLineIpo = { MainLineIpo: SearchIpo4 };
+    //   res.status(200).send({ msg: "All MainLineIpo", data: MainLineIpo });
+    // }
+    else {
       /*
       GetAll
       Data For IPO
@@ -245,7 +271,7 @@ const GetMainLineIpo = async (req, res) => {
         .limit(Number(limit))
         .get()
         .then((querySnapshot) => {
-          if (querySnapshot.size === 0) {
+          if (querySnapshot.size == 0) {
             // No more documents left
             console.log("No more documents left");
             res.status(200).send({ msg: "No more documents left" });
@@ -256,7 +282,8 @@ const GetMainLineIpo = async (req, res) => {
             id: doc.id,
             ...doc.data(),
           }));
-          userInformation.get().then((querySnapshot) => {
+          console.log(MainLineIpo);
+          GetIpo.get().then((querySnapshot) => {
             let Total = querySnapshot.size;
             // console.log(TotalUsers);
             const Merged = { MainLineIpo, Total };
