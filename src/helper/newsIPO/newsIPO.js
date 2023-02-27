@@ -3,15 +3,13 @@ const express = require("express");
 const webApp = express();
 const saltedMd5 = require("salted-md5");
 const path = require("path");
-const multer = require("multer");
-const upload = multer({ storage: multer.memoryStorage() });
 var admin = require("firebase-admin");
 
 const News = firestore.collection("News");
 webApp.locals.bucket = admin.storage().bucket();
-/*
-create News  
-**/
+/**
+ * The following Api contains source code for a Create News.
+ */
 const createNews = async (req, res, body) => {
   try {
     if (req.file) {
@@ -63,14 +61,13 @@ const createNews = async (req, res, body) => {
     res.status(400).send(error);
   }
 };
-/*
-update News 
-**/
+/**
+ * The following Api contains source code for a Update News.
+ */
 const UpdateNews = async (req, res) => {
   const id = req.params.id;
   delete req.params.id;
   const GetNews = News.doc(id);
-
   const GetData = await GetNews.get();
   const data = req.body;
   if (GetData.exists) {
@@ -80,9 +77,9 @@ const UpdateNews = async (req, res) => {
     res.status(300).send({ msg: "UserId Not Found" });
   }
 };
-/*
-update News-Image 
-**/
+/**
+ * The following Api contains source code for a Upload News Image.
+ */
 const updateNewsImage = async (req, res) => {
   try {
     if (req.file) {
@@ -130,13 +127,13 @@ const updateNewsImage = async (req, res) => {
     res.status(400).send({ msg: "User Not Found" });
   }
 };
-/*
-Get All News 
-**/
+/**
+ * The following Api contains source code for a Get All News.
+ */
 const GetAllNews = async (req, res) => {
   try {
-    const limit = req.query.limit || 2;
-    let page = req.query.page || 3;
+    const limit = req.query.limit || 10;
+    let page = req.query.page || 1;
     const keyword = req.body.keyword;
     if (req.body.keyword) {
       const date = await News.where("Date", "==", keyword)
@@ -157,9 +154,13 @@ const GetAllNews = async (req, res) => {
       }));
 
       if (SearchIpo.length > null) {
-        res.status(200).send({ msg: "Search News", data: SearchIpo });
+        res
+          .status(200)
+          .send({ msg: "Search News", data: { AllNews: SearchIpo } });
       } else if (SearchIpo2.length > 0) {
-        res.status(200).send({ msg: "Search News", data: SearchIpo2 });
+        res
+          .status(200)
+          .send({ msg: "Search News", data: { AllNews: SearchIpo2 } });
       } else {
         res.status(200).send({ msg: "Not Keyword Found" });
       }
@@ -176,12 +177,6 @@ const GetAllNews = async (req, res) => {
           .limit(Number(limit))
           .get()
           .then((querySnapshot) => {
-            if (querySnapshot.size === 0) {
-              // No more documents left
-              console.log("No more documents left");
-              res.status(200).send({ msg: "No more documents left" });
-              return;
-            }
             console.log(`Page ${page}:`);
             const AllNews = querySnapshot.docs.map((doc) => ({
               id: doc.id,
@@ -189,7 +184,6 @@ const GetAllNews = async (req, res) => {
             }));
             News.get().then((querySnapshot) => {
               let Total = querySnapshot.size;
-              // console.log(TotalUsers);
               const Merged = { AllNews, Total };
               res
                 .status(200)
@@ -204,21 +198,9 @@ const GetAllNews = async (req, res) => {
     res.status(400).send({ msg: "User Not Found" });
   }
 };
-// if (GetNews) {
-//   const GetAllNews = GetNews.docs.map((doc) => ({
-//     id: doc.id,
-//     ...doc.data(),
-//   }));
-//   res
-//     .status(200)
-//     .send({ msg: "Get All News Successfully", data: GetAllNews });
-// } else {
-//   res.status(300).send({ msg: "News Not Found" });
-// }
-
-/*
-GetId By single News Details
-**/
+/**
+ * The following Api contains source code for a Get Single News.
+ */
 const GetSingleNews = async (req, res) => {
   try {
     const id = req.params.id;
@@ -264,9 +246,9 @@ const GetSingleNews = async (req, res) => {
     res.status(400).send({ msg: "News Not Found" });
   }
 };
-/*
-Deleted single offer Detail
-**/
+/**
+ * The following Api contains source code for a Delete News.
+ */
 const DeleteNews = async (req, res) => {
   const id = req.params.id;
   const GetNews = News.doc(id);

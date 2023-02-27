@@ -1,17 +1,13 @@
 const { firestore } = require("../../config/firestoreCloud");
 const express = require("express");
 const webApp = express();
-const saltedMd5 = require("salted-md5");
-const path = require("path");
-const multer = require("multer");
-const upload = multer({ storage: multer.memoryStorage() });
 var admin = require("firebase-admin");
 
 const AllotmentTips = firestore.collection("IPOAllotmentTips");
 webApp.locals.bucket = admin.storage().bucket();
-/*
-create IPO Allotment Tips 
-**/
+/**
+ * The following Api contains source code for a IPO Allotment-Tips Created.
+ */
 const IPOAllotmentTips = async (req, res, body) => {
   try {
     const IPOAllotmentTips = {
@@ -28,13 +24,12 @@ const IPOAllotmentTips = async (req, res, body) => {
       res.status(300).send({ msg: "AllotmentTips Not Found" });
     }
   } catch (error) {
-    console.log(error, "error");
     res.status(400).send(error);
   }
 };
-/*
-update Allotment Tips 
-**/
+/**
+ * The following Api contains source code for a IPO Allotment-Tips Updated.
+ */
 const UpdateAllotment = async (req, res) => {
   const id = req.params.id;
   delete req.params.id;
@@ -49,10 +44,9 @@ const UpdateAllotment = async (req, res) => {
     res.status(300).send({ msg: "UserId Not Found" });
   }
 };
-
-/*
-Get All Allotment-Tips 
-**/
+/**
+ * The following Api contains source code for a GetAll IPO Allotment-Tips.
+ */
 const GetAllIPOAllotmentTips = async (req, res) => {
   const GetAllotmentTips = await AllotmentTips.select("AllotmentTips").get();
   if (GetAllotmentTips) {
@@ -65,9 +59,9 @@ const GetAllIPOAllotmentTips = async (req, res) => {
     res.status(300).send({ msg: "Allotment Tips Not Found" });
   }
 };
-/*
-GetId By single Allotment-Tips Details
-**/
+/**
+ * The following Api contains source code for a Get Single IPO Allotment-Tips.
+ */
 const GetSingleAllotment = async (req, res) => {
   try {
     const id = req.params.id;
@@ -104,10 +98,9 @@ const GetSingleAllotment = async (req, res) => {
     res.status(400).send({ msg: "Allotment-Tips Not Found" });
   }
 };
-
-/*
-Deleted single Allotment-Tips
-**/
+/**
+ * The following Api contains source code for a Delete Single IPO Allotment-Tips.
+ */
 const DeleteAllotmentTips = async (req, res) => {
   const id = req.params.id;
   const GetAllotmentTips = AllotmentTips.doc(id);

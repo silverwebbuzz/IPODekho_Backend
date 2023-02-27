@@ -3,15 +3,12 @@ const express = require("express");
 const webApp = express();
 const saltedMd5 = require("salted-md5");
 const path = require("path");
-const multer = require("multer");
-const upload = multer({ storage: multer.memoryStorage() });
 var admin = require("firebase-admin");
-
 const offers = firestore.collection("Offers");
 webApp.locals.bucket = admin.storage().bucket();
-/*
-create offer 
-**/
+/**
+ * The following Api contains source code for a Create Offers.
+ */
 const createOffer = async (req, res, body) => {
   try {
     if (req.file) {
@@ -31,10 +28,8 @@ const createOffer = async (req, res, body) => {
         createdAt: new Date(),
         file: file,
       };
-
       if (OfferIPO) {
         await offers.add(OfferIPO);
-        //  ({ ignoreUndefinedProperties: true })
         res.status(200).send({
           msg: "Offer Created Successfully",
           data: OfferIPO,
@@ -62,30 +57,32 @@ const createOffer = async (req, res, body) => {
       }
     }
   } catch (error) {
-    console.log(error, "error");
     res.status(400).send(error);
   }
 };
-/*
-update offer 
-**/
+/**
+ * The following Api contains source code for a Update Offers.
+ */
 const UpdateOffer = async (req, res) => {
-  const id = req.params.id;
-  delete req.params.id;
-  const GetOffer = offers.doc(id);
-
-  const GetData = await GetOffer.get();
-  const data = req.body;
-  if (GetData.exists) {
-    await offers.doc(id).update(data, { new: true });
-    res.status(200).send({ msg: "Offer updated Successfully", data: data });
-  } else {
-    res.status(300).send({ msg: "UserId Not Found" });
+  try {
+    const id = req.params.id;
+    delete req.params.id;
+    const GetOffer = offers.doc(id);
+    const GetData = await GetOffer.get();
+    const data = req.body;
+    if (GetData.exists) {
+      await offers.doc(id).update(data, { new: true });
+      res.status(200).send({ msg: "Offer updated Successfully", data: data });
+    } else {
+      res.status(300).send({ msg: "UserId Not Found" });
+    }
+  } catch (error) {
+    res.status(400).send(error);
   }
 };
-/*
-update offer-Image 
-**/
+/**
+ * The following Api contains source code for a Update Image.
+ */
 const updateImage = async (req, res) => {
   try {
     if (req.file) {
@@ -109,10 +106,8 @@ const updateImage = async (req, res) => {
       }
     } else if (req.file == null) {
       const id = req.params.id;
-      console.log(id);
       delete req.params.id;
       const GetOffers = offers.doc(id);
-
       const GetData = await GetOffers.get();
       const updateFile = {
         file: "",
@@ -131,13 +126,12 @@ const updateImage = async (req, res) => {
     res.status(400).send({ msg: "User Not Found" });
   }
 };
-/*
-Get All offer 
-**/
+/**
+ * The following Api contains source code for a Get All Offers.
+ */
 const GetAllOffer = async (req, res) => {
   try {
     const limit = req.query.limit || 2;
-    let offset = req.query.offset || 2; // initial offset
     let page = req.query.page || 3;
     const keyword = req.body.keyword;
     if (req.body.keyword) {
@@ -169,11 +163,17 @@ const GetAllOffer = async (req, res) => {
         ...doc.data(),
       }));
       if (SearchIpo.length > null) {
-        res.status(200).send({ msg: "Search Offers", data: SearchIpo });
+        res
+          .status(200)
+          .send({ msg: "Search Offers", data: { AllOffers: SearchIpo } });
       } else if (SearchIpo2.length > 0) {
-        res.status(200).send({ msg: "Search Offers", data: SearchIpo2 });
+        res
+          .status(200)
+          .send({ msg: "Search Offers", data: { AllOffers: SearchIpo2 } });
       } else if (SearchIpo3.length > 0) {
-        res.status(200).send({ msg: "Search Offers", data: SearchIpo3 });
+        res
+          .status(200)
+          .send({ msg: "Search Offers", data: { AllOffers: SearchIpo3 } });
       } else {
         res.status(200).send({ msg: "Not Keyword Found" });
       }
@@ -186,26 +186,21 @@ const GetAllOffer = async (req, res) => {
         "offerStatus",
         "file"
       );
-
       if (GetOffer) {
         GetOffer.offset(Number(page - 1) * limit)
           .limit(Number(limit))
           .get()
           .then((querySnapshot) => {
             if (querySnapshot.size === 0) {
-              // No more documents left
-              console.log("No more documents left");
               res.status(200).send({ msg: "No more documents left" });
               return;
             }
-            console.log(`Page ${page}:`);
             const AllOffers = querySnapshot.docs.map((doc) => ({
               id: doc.id,
               ...doc.data(),
             }));
             offers.get().then((querySnapshot) => {
               let Total = querySnapshot.size;
-              // console.log(TotalUsers);
               const Merged = { AllOffers, Total };
               res
                 .status(200)
@@ -220,9 +215,9 @@ const GetAllOffer = async (req, res) => {
     res.status(400).send(error);
   }
 };
-/*
-GetId By single offer Details
-**/
+/**
+ * The following Api contains source code for a Get Single Offer.
+ */
 const GetISingleOffer = async (req, res) => {
   try {
     const id = req.params.id;
@@ -270,18 +265,22 @@ const GetISingleOffer = async (req, res) => {
     res.status(400).send({ msg: "Offer Not Found" });
   }
 };
-/*
-Deleted single offer Detail
-**/
+/**
+ * The following Api contains source code for a Delete Offers.
+ */
 const DeleteOffer = async (req, res) => {
-  const id = req.params.id;
-  const GetOffer = offers.doc(id);
-  const GetData = await GetOffer.get();
-  if (GetData.exists) {
-    await offers.doc(id).delete();
-    res.status(200).send({ msg: "Offer Deleted Successfully" });
-  } else {
-    res.status(400).send({ msg: "Oops! User Not Found" });
+  try {
+    const id = req.params.id;
+    const GetOffer = offers.doc(id);
+    const GetData = await GetOffer.get();
+    if (GetData.exists) {
+      await offers.doc(id).delete();
+      res.status(200).send({ msg: "Offer Deleted Successfully" });
+    } else {
+      res.status(400).send({ msg: "Oops! User Not Found" });
+    }
+  } catch (error) {
+    res.status(400).send({ msg: "Offer Not Found" });
   }
 };
 module.exports = {

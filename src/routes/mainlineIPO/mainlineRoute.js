@@ -17,11 +17,6 @@ router.post("/UpdateMainLineIpo/:id", MainLineIPO.UpdateMainLineIpo);
 router.delete("/DeleteMainLineIpo/:id", MainLineIPO.DeleteMainLineIpo);
 router.post("/uploadImage/:id", upload.single("file"), MainLineIPO.uploadImage);
 router.get("/GetImage/:id", MainLineIPO.GetImage);
-router.put("/updateStatus/:id", MainLineIPO.updateStatus);
-router.get("/GetIMainLineIPOStatus/:id", MainLineIPO.GetIMainLineIPOStatus);
-router.get("/Pagination", MainLineIPO.Pagination);
-router.post("/message", MainLineIPO.message);
-router.get("/getMessage", MainLineIPO.getMessage);
 module.exports = {
   router,
 };

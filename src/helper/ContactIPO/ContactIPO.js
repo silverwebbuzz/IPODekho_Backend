@@ -1,18 +1,16 @@
 const { firestore } = require("../../config/firestoreCloud");
 const Contact = firestore.collection("Contact Us");
 
-/* 
-Get Contact Us IPO
-**/
+/**
+ * The following Api contains source code for a Get All Contact Data.
+ */
 const getAllContact = async (req, res) => {
   try {
     const limit = req.query.limit || 5;
     let page = req.query.page || 1;
     const keyword = req.body.keyword;
     if (req.body.keyword) {
-      const email = await Contact
-        // .orderBy("companyName", "asc")
-        .where("email", "==", keyword)
+      const email = await Contact.where("email", "==", keyword)
         .offset(Number(page - 1) * limit)
         .limit(Number(limit))
         .get();
@@ -77,18 +75,15 @@ const getAllContact = async (req, res) => {
           .then((querySnapshot) => {
             if (querySnapshot.size === 0) {
               // No more documents left
-              console.log("No more documents left");
               res.status(200).send({ msg: "No more documents left" });
               return;
             }
-            console.log(`Page ${page}:`);
             const AllContact = querySnapshot.docs.map((doc) => ({
               id: doc.id,
               ...doc.data(),
             }));
             Contact.get().then((querySnapshot) => {
               let Total = querySnapshot.size;
-              // console.log(TotalUsers);
               const Merged = { AllContact, Total };
               res
                 .status(200)
@@ -100,7 +95,6 @@ const getAllContact = async (req, res) => {
       }
     }
   } catch (error) {
-    console.log(error, "error");
     res.status(400).send({ msg: "User Not Found" });
   }
 };

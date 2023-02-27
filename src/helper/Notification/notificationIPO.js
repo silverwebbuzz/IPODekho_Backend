@@ -1,13 +1,35 @@
 const { firestore } = require("../../config/firestoreCloud");
 const express = require("express");
 const webApp = express();
-var admin = require("firebase-admin");
-
+const admin = require("firebase-admin");
+const messaging = admin.messaging();
 const Notification = firestore.collection("Notification");
 
-/*
-create Notification  
-**/
+/**
+ * The following Api contains source code for a Create Notification Campaign.
+ */
+const createCampaign = async (req, res, body) => {
+  const notification_options = {
+    priority: "high",
+    timeToLive: 60 * 60 * 24,
+  };
+  const registrationToken = "1:931102543499:android:9f704203083ee7e2cf4e8e";
+  const message = req.body.message;
+  const options = notification_options;
+
+  admin
+    .messaging()
+    .sendToDevice(registrationToken, message, options)
+    .then((response) => {
+      res.status(200).send("Notification sent successfully");
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+};
+/**
+ * The following Api contains source code for a Create Notification.
+ */
 const createNotification = async (req, res, body) => {
   try {
     const Data = {
@@ -29,14 +51,12 @@ const createNotification = async (req, res, body) => {
     res.status(400).send(error);
   }
 };
-
-/*
-Get All Notification 
-**/
+/**
+ * The following Api contains source code for a Get All Notifications.
+ */
 const GetAllNotification = async (req, res) => {
   try {
     const limit = req.query.limit || 2;
-    let offset = req.query.offset || 2; // initial offset
     let page = req.query.page || 3;
 
     const keyword = req.body.keyword;
@@ -91,19 +111,15 @@ const GetAllNotification = async (req, res) => {
           .get()
           .then((querySnapshot) => {
             if (querySnapshot.size === 0) {
-              // No more documents left
-              console.log("No more documents left");
               res.status(200).send({ msg: "No more documents left" });
               return;
             }
-            console.log(`Page ${page}:`);
             const AllNotification = querySnapshot.docs.map((doc) => ({
               id: doc.id,
               ...doc.data(),
             }));
             Notification.get().then((querySnapshot) => {
               let Total = querySnapshot.size;
-              // console.log(TotalUsers);
               const Merged = { AllNotification, Total };
               res
                 .status(200)
@@ -118,9 +134,9 @@ const GetAllNotification = async (req, res) => {
     res.status(400).send({ msg: "User Not Found" });
   }
 };
-/*
-GetId By single News Details
-**/
+/**
+ * The following Api contains source code for a Get Single Notification.
+ */
 const GetSingleNotification = async (req, res) => {
   try {
     const id = req.params.id;
@@ -162,9 +178,9 @@ const GetSingleNotification = async (req, res) => {
     res.status(400).send({ msg: "Notification Not Found" });
   }
 };
-/*
-Deleted single offer Detail
-**/
+/**
+ * The following Api contains source code for a Delete Notification.
+ */
 const DeleteNotification = async (req, res) => {
   const id = req.params.id;
   const GetNotification = Notification.doc(id);
@@ -181,4 +197,5 @@ module.exports = {
   GetAllNotification,
   GetSingleNotification,
   DeleteNotification,
+  createCampaign,
 };
