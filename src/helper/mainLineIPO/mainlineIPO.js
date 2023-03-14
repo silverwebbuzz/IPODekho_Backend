@@ -501,7 +501,7 @@ const uploadImage = async (req, res) => {
         await userInformation.doc(id).update({ file: file });
         res
           .status(200)
-          .send({ msg: "Image Uploaded Successfully", file: merged });
+          .send({ msg: "Image Uploaded Successfully", data: merged });
       } else {
         const name = saltedMd5(req.file.originalname, "SUPER-S@LT!");
         const fileName = name + path.extname(req.file.originalname);
